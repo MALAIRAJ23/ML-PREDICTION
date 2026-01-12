@@ -6,8 +6,9 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ .
-COPY data/ ./data/
-COPY models/ ./models/
+
+# Initialize database and train models during build
+RUN python setup_fixed.py
 
 EXPOSE 5000
 
