@@ -60,35 +60,51 @@ def get_forecast():
 @app.route('/api/polls', methods=['GET'])
 def get_polls():
     try:
-        # Return mock poll data
-        mock_polls = [
-            {
-                "id": 1,
-                "organisation": "C-Voter",
-                "fieldwork_date": "2025-12-15",
-                "sample_size": 2500,
+        # Return 50 diverse mock poll data
+        import random
+        from datetime import datetime, timedelta
+        
+        organisations = ["C-Voter", "ABP-CVoter", "India Today-Axis", "Times Now-VMR", "Republic-P-MARQ", 
+                        "CNN-News18", "Zee News-BARC", "NewsX-Neta", "TV9-Polstrat", "Lokniti-CSDS"]
+        
+        mock_polls = []
+        base_date = datetime(2025, 12, 15)
+        
+        for i in range(50):
+            # Vary the percentages realistically
+            stalin_base = 42 + random.uniform(-8, 8)
+            vijay_base = 28 + random.uniform(-6, 6)
+            eps_base = 19 + random.uniform(-5, 5)
+            annamalai_base = 6 + random.uniform(-2, 4)
+            seeman_base = 3 + random.uniform(-1, 2)
+            others_base = 2 + random.uniform(-1, 2)
+            
+            # Normalize to 100%
+            total = stalin_base + vijay_base + eps_base + annamalai_base + seeman_base + others_base
+            stalin_pct = round((stalin_base / total) * 100, 1)
+            vijay_pct = round((vijay_base / total) * 100, 1)
+            eps_pct = round((eps_base / total) * 100, 1)
+            annamalai_pct = round((annamalai_base / total) * 100, 1)
+            seeman_pct = round((seeman_base / total) * 100, 1)
+            others_pct = round(100 - stalin_pct - vijay_pct - eps_pct - annamalai_pct - seeman_pct, 1)
+            
+            poll_date = base_date - timedelta(days=i*2)
+            
+            mock_polls.append({
+                "id": i + 1,
+                "organisation": random.choice(organisations),
+                "fieldwork_date": poll_date.strftime("%Y-%m-%d"),
+                "sample_size": random.randint(1200, 3500),
                 "region": "Tamil Nadu",
-                "stalin_pct": 42.5,
-                "vijay_pct": 28.3,
-                "eps_pct": 18.7,
-                "annamalai_pct": 6.2,
-                "seeman_pct": 2.8,
-                "others_pct": 1.5
-            },
-            {
-                "id": 2,
-                "organisation": "ABP-CVoter",
-                "fieldwork_date": "2025-12-10",
-                "sample_size": 1800,
-                "region": "Tamil Nadu",
-                "stalin_pct": 44.2,
-                "vijay_pct": 26.8,
-                "eps_pct": 19.5,
-                "annamalai_pct": 5.8,
-                "seeman_pct": 2.2,
-                "others_pct": 1.5
-            }
-        ]
+                "stalin_pct": stalin_pct,
+                "vijay_pct": vijay_pct,
+                "eps_pct": eps_pct,
+                "annamalai_pct": annamalai_pct,
+                "seeman_pct": seeman_pct,
+                "others_pct": others_pct,
+                "created_at": poll_date.isoformat()
+            })
+        
         return jsonify(mock_polls)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -110,10 +126,6 @@ def add_poll():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy", "service": "tn-election-backend"})
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
